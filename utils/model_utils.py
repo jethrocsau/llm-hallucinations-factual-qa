@@ -1,4 +1,5 @@
 import functools
+import gc
 import os
 import pickle
 import re
@@ -183,6 +184,7 @@ def model_forward(input_: torch.Tensor, model, extra_forward_args: Dict[str, Any
 def generate_attributes(model, tokenizer, embedder, question,targets):
 
     # For storing results
+    results = defaultdict(list)
     fully_connected_hidden_layers = defaultdict(list)
     attention_hidden_layers = defaultdict(list)
     attention_forward_handles = {}
@@ -205,7 +207,6 @@ def generate_attributes(model, tokenizer, embedder, question,targets):
     forward_func = partial(model_forward, model=model, extra_forward_args={})
 
     # Generate results
-    results = defaultdict(list)
     fully_connected_hidden_layers.clear()
     attention_hidden_layers.clear()
 
@@ -228,5 +229,9 @@ def generate_attributes(model, tokenizer, embedder, question,targets):
     results['first_attention'].append(first_attention)
     results['final_attention'].append(final_attention)
     results['attributes_first'].append(attributes_first)
+
+    del fully_connected_hidden_layers
+    del attention_hidden_layers
+    gc.collect()
 
     return results

@@ -44,13 +44,15 @@ def load_data(start=0, end=-1):
         aliases.append(obs['answer']['normalized_value'])
         full_dataset.append((obs['question'], aliases))
     dataset = full_dataset[start: end]
+
+    del trivia_dataset
     return dataset
 
 # format prompt
-def format_prompt(original_prompt, question,  answer, template_name, num_answer_string = 20):
+def format_prompt(original_prompt: str, question:str,  answer:str, template_name:str, num_answer_str = 20):
     template = prompts[template_name]
-    if num_answer_string > 0:
-        gen_len = min(len(answer), num_answer_string)
+    if num_answer_str > 0:
+        gen_len = min(len(answer), num_answer_str)
         answer = answer[:gen_len]
     prompt = original_prompt + '\n' + template.substitute(
         question=question,
@@ -58,3 +60,16 @@ def format_prompt(original_prompt, question,  answer, template_name, num_answer_
     )
     return prompt
 
+
+# format results generated from generate attributes
+def format_result(result,feature = None):
+    save_result = {}
+    save_result['question'] = result['question'][0]
+    save_result['str_response'] = result['str_response'][0]
+    save_result['hallucination'] = result['hallucination']
+    save_result['correct'] = result['correct']
+    save_result['turn'] = result['turn']
+
+    if feature is not None:
+        save_result['feature'] = result['feature'][0]
+    return save_result

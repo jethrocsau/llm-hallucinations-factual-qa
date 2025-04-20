@@ -10,20 +10,21 @@
 #SBATCH --account=mscbdt2024
 
 # Setup runtime environment
-cd msbd5002
+#cd msbd5002
 
 # If need to install env
 #module avail
 #module load Anaconda3
 #conda init
-#conda create -y -n hallucination python=3.10 numpy scipy ipykernel pandas scikit-learn
-#source activate hallucination
+#conda create -y -n hallucination_slurm python=3.10 numpy scipy ipykernel pandas
+#source activate hallucination_slurm
+#pip install scikit-learn
 #pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-##pip install git+https://github.com/huggingface/transformers.git
+#pip install git+https://github.com/huggingface/transformers.git
 #pip install matplotlib seaborn accelerate sentencepiece evaluate einops rouge-score gputil captum
 #pip install selfcheckgpt spacy
 #python -m spacy download en_core_web_sm
 
 # Execute applications
-source activate hallucination
-srun python generation.py
+source activate hallucination_slurm
+srun python generate.py

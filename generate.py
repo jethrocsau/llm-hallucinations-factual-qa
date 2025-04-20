@@ -2,7 +2,7 @@ import gc
 import os
 import pickle
 from datetime import datetime
-
+from tqdm import tqdm
 import numpy as np
 import torch
 from datasets import load_dataset
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     #load configurations
     start = 0
-    end = 2
+    end = 100
 
     #load configurations
     if debug: print("Loading configurations...")
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     multi_turn = []
     n = 3
     p_thresh = 0.5
-    for i, (question, aliases) in enumerate(dataset):
+    for i, (question, aliases) in enumerate(tqdm(dataset)):
         if debug and i > 10:
             break
         turn_data = generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh)

@@ -24,6 +24,9 @@ prompts = {
     ),
     'inst-wrong': Template(
         "<<INST>> Your answer was wrong. Retry answering the question.<</INST>>\nQ: $question\nA: "
+    ),
+    'rephrase': Template(
+        "<<SYS>> Rephrase the question.<</SYS>>\n $question"
     )
 }
 
@@ -58,6 +61,20 @@ def format_prompt(original_prompt: str, question:str,  answer:str, template_name
         question=question
     )
     return prompt
+
+# rephrase propmt with llm model
+def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length = 50):
+    rephrase_prompt = prompts[template_name].substitute(
+        question=question
+    )
+    input_ids = tokenizer.encode(rephrase_prompt, return_tensors='pt').to(model.device)
+    with torch.no_grad():
+        output = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
+    output = tokenizer.decode(output[0], skip_special_tokens=True)
+    default_prompt = prompts['default'].substitute(
+        question=output
+    )
+    return output
 
 
 # format results generated from generate attributes

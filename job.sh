@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#SBATCH -J llm-hallucination 
-#SBATCH -t 48:00:00 
+#SBATCH -J llm-hallucination
+#SBATCH -t 48:00:00
 #SBATCH --mail-user=csauac@connect.ust.hk
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH -p normal
-#SBATCH -N 1 -n 4 --gres=gpu:2
+#SBATCH -N 1 -n 8 --gres=gpu:2
 #SBATCH --account=mscbdt2024
 
 # Setup runtime environment

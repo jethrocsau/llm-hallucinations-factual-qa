@@ -23,7 +23,7 @@ Thie module was adapted from the original implementation from the llm-hallucinat
 '''
 # Global variables
 ig_steps = 64
-internal_batch_size = 4
+internal_batch_size = 1
 
 # Model
 model_name = "open_llama_7b" #"opt-30b"

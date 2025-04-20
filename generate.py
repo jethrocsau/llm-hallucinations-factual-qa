@@ -12,10 +12,16 @@ from utils.data_utils import (format_prompt, format_result, load_data,
                               load_prompts)
 from utils.model_utils import generate_attributes, load_model
 
+#Flags
+debug = False
+data_mining = True
+
 # global variables
 cwd = os.path.dirname(__file__)
-results_dir = os.path.join(os.path.dirname(cwd), 'result')
-debug = True
+results_dir = os.path.join(cwd, 'result')
+# create directory if not exists
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
 template = load_prompts()
 
 # generate N-turns
@@ -35,10 +41,16 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
         if prob > p_thresh:
             results['hallucination'] = True
             prompt = format_prompt(results['question'][0], question,  results['str_response'][0], template_name , num_answer_str = 10)
-            n_gen_result.append(format_result(results))
+            if data_mining:
+                n_gen_result.append(format_result(results, save_all=True))
+            else:
+                n_gen_result.append(format_result(results, save_all=False))
         else:
             results['hallucination'] = False
-            n_gen_result.append(format_result(results))
+            if data_mining:
+                n_gen_result.append(format_result(results, save_all=True))
+            else:
+                n_gen_result.append(format_result(results, save_all=False))
             break
 
         del results
@@ -57,18 +69,16 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 # attribute N-generations
 if __name__ == "__main__":
 
-    #load triviaQA
+    #load configurations
     start = 0
-    end = 10
-    if debug: print("Loading data...")
+    end = 2
+
+    #load configurations
+    if debug: print("Loading configurations...")
     dataset = load_data()[start:end]
-
-    # load model
     model, tokenizer, embedder = load_model()
-
-    #load prompts
-    if debug: print("Loading prompts...")
-    default_p = template['default']
+    template_name = 'default'
+    default_p = template[template_name]
 
     #generate multiturn
     if debug: print("Generating multiturn attributes...")
@@ -96,6 +106,8 @@ if __name__ == "__main__":
     if debug: print("Saving results...")
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d_%H-%M-%S")
-    save_path = os.path.join(results_dir, f"multiturn_{dt_string}.pkl")
+    save_path = os.path.join(results_dir, f"multiturn_{template_name}_{dt_string}_{start}-{end}.pkl")
+
+    #create file if not exists
     with open(save_path, 'wb') as f:
         pickle.dump(multi_turn, f)

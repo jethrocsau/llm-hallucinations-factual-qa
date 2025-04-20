@@ -20,10 +20,10 @@ prompts = {
         "Q: $question\nA: "
     ),
     'sys-wrong': Template(
-        "<<SYS>> Your answer was wrong. You answered started with $prev_answer. Retry answering the question.<</SYS>>\nQ: $question\nA: "
+        "<<SYS>> Your answer was wrong. Retry answering the question.<</SYS>>\nQ: $question\nA: "
     ),
     'inst-wrong': Template(
-        "<<INST>> Your answer was wrong. You answered started with $prev_answer. Retry answering the question.<</INST>>\nQ: $question\nA: "
+        "<<INST>> Your answer was wrong. Retry answering the question.<</INST>>\nQ: $question\nA: "
     )
 }
 
@@ -54,22 +54,24 @@ def format_prompt(original_prompt: str, question:str,  answer:str, template_name
     if num_answer_str > 0:
         gen_len = min(len(answer), num_answer_str)
         answer = answer[:gen_len]
-    prompt = original_prompt + '\n' + template.substitute(
-        question=question,
-        prev_answer=answer
+    prompt = original_prompt + answer + '\n' + template.substitute(
+        question=question
     )
     return prompt
 
 
 # format results generated from generate attributes
-def format_result(result,feature = None):
-    save_result = {}
-    save_result['question'] = result['question'][0]
-    save_result['str_response'] = result['str_response'][0]
-    save_result['hallucination'] = result['hallucination']
-    save_result['correct'] = result['correct']
-    save_result['turn'] = result['turn']
+def format_result(result,save_all = False):
 
-    if feature is not None:
-        save_result['feature'] = result['feature'][0]
-    return save_result
+    if save_all:
+        result['question'] = result['question'][0]
+        result['str_response'] = result['str_response'][0]
+        return result
+    else:
+        save_result = {}
+        save_result['question'] = result['question'][0]
+        save_result['str_response'] = result['str_response'][0]
+        save_result['hallucination'] = result['hallucination']
+        save_result['correct'] = result['correct']
+        save_result['turn'] = result['turn']
+        return save_result

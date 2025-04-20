@@ -1,4 +1,6 @@
+import json
 import os
+import pickle
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -27,7 +29,21 @@ prompts = {
     ),
     'rephrase': Template(
         "<<SYS>> Rephrase the question.<</SYS>>\n $question"
-    )
+    ),
+    'hint': Template(
+        "<<SYS>> Provide a hint to the question.<</SYS>>\n\n ### Question: $question\n\n ### Hint: "
+    ),
+    'hint-qa': Template(
+        "Q: $question\n Hint: $hint\n A: "
+    ),
+}
+
+prompt_splitter = {
+    'default': "A: ",
+    'sys-wrong': "A:",
+    'inst-wrong': "<<SYS>>",
+    'rephrase': "<<SYSS>>",
+    'hint': "### Hint: ",
 }
 
 def load_prompts():
@@ -63,19 +79,26 @@ def format_prompt(original_prompt: str, question:str,  answer:str, template_name
     return prompt
 
 # rephrase propmt with llm model
-def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length = 50):
+def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length = 50, sensitivity = 1):
     rephrase_prompt = prompts[template_name].substitute(
         question=question
     )
     input_ids = tokenizer.encode(rephrase_prompt, return_tensors='pt').to(model.device)
     with torch.no_grad():
-        output = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
+        output = model.generate(input_ids, max_new_tokens=max_length, num_return_sequences=1, do_sample=True, temperature=sensitivity)
     output = tokenizer.decode(output[0], skip_special_tokens=True)
-    default_prompt = prompts['default'].substitute(
-        question=output
-    )
-    return output
+    response = output[len(rephrase_prompt):].strip()
+    if template_name == 'hint':
+        output = prompts['hint-qa'].substitute(
+            question=question,
+            hint=response
+        )
+    elif template_name == 'rephrase':
+        output = prompts['default'].substitute(
+            question=response
+        )
 
+    return output
 
 # format results generated from generate attributes
 def format_result(result,save_all = False):
@@ -92,3 +115,22 @@ def format_result(result,save_all = False):
         save_result['correct'] = result['correct']
         save_result['turn'] = result['turn']
         return save_result
+
+def open_json(save_path):
+    results = []
+    with open(save_path, 'r') as f:
+        for line in f:
+            result = json.loads(line.strip())  # Deserialize each line
+            results.append(result)
+    return results
+
+def read_pickle(save_path):
+    results = []
+    with open(save_path, 'rb') as f:
+        while True:
+            try:
+                result = pickle.load(f)
+                results.append(result)
+            except EOFError:
+                break
+    return results

@@ -42,7 +42,7 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
         prob = run_classifier(results,val_fix = 1,debug = debug)
         if prob > p_thresh:
             results['hallucination'] = True
-            prompt = rephrase_prompt(model, tokenizer, question, template_name ,max_length = len(question))
+            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = len(question),sensitivity = 0.1)
             #prompt = format_prompt(results['question'][0], question,  results['str_response'][0], template_name , num_answer_str = 10)
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
@@ -58,8 +58,8 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
         if debug:
             print(f"Turn {i}:")
-            print(f"Question: {results['question'][0]}")
-            print(f"Response: {results['str_response'][0]}")
+            print(f"Question: {results['question']}")
+            print(f"Response: {results['str_response']}")
             print(f"Hallucination: {results['hallucination']}")
             print(f"Correct: {results['correct']}")
             print(f"Next Turn Prompt: {prompt}")
@@ -67,7 +67,7 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
         gc.collect()
 
     # Save the result to disk
-    save_result(n_gen_result, save_path)
+    save_result([n_gen_result], save_path)
 
     if debug:
         for i in range(len(n_gen_result)):
@@ -81,8 +81,10 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
 # Save individual results to disk
 def save_result(result, save_path):
-    with open(save_path, 'ab') as f:  # Append to the file in binary mode
-        pickle.dump(result, f)
+    with open(save_path, mode='a+b') as f:
+        for item in result:
+            pickle.dump(item, f)
+
 
 # attribute N-generations
 if __name__ == "__main__":
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     #load save_path
     now = datetime.now()
     dt_string = now.strftime("%Y-%m-%d_%H-%M-%S")
-    save_path = os.path.join(results_dir, f"multiturn_{template_name}_{dt_string}_{start}-{end}.pkl")
+    save_path = os.path.join(results_dir, f"{start}-{end}_{template_name}_multiturn_{dt_string}.pkl")
 
     #generate multiturn
     if debug: print("Generating multiturn attributes...")

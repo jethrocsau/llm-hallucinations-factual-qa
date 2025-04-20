@@ -285,6 +285,5 @@ def compute_and_save_results():
     with open(results_dir/f"{model_name}_{dataset_name}_start-{start}_end-{end}_{datetime.now().month}_{datetime.now().day}.pickle", "wb") as outfile:
         outfile.write(pickle.dumps(results))
 
-
 if __name__ == '__main__':
     compute_and_save_results()

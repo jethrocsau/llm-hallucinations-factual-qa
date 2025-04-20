@@ -1,5 +1,9 @@
 import gc
+import os
+import pickle
+from datetime import datetime
 
+import numpy as np
 import torch
 from datasets import load_dataset
 
@@ -9,6 +13,8 @@ from utils.data_utils import (format_prompt, format_result, load_data,
 from utils.model_utils import generate_attributes, load_model
 
 # global variables
+cwd = os.path.dirname(__file__)
+results_dir = os.path.join(os.path.dirname(cwd), 'result')
 debug = True
 template = load_prompts()
 
@@ -45,7 +51,6 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
             print(f"Response: {n_gen_result[i]['str_response']}")
             print(f"Hallucination: {n_gen_result[i]['hallucination']}")
             print(f"Correct: {n_gen_result[i]['correct']}")
-
     return n_gen_result
 
 
@@ -53,8 +58,10 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 if __name__ == "__main__":
 
     #load triviaQA
+    start = 0
+    end = 10
     if debug: print("Loading data...")
-    dataset = load_data()[:10]
+    dataset = load_data()[start:end]
 
     # load model
     model, tokenizer, embedder = load_model()
@@ -84,3 +91,11 @@ if __name__ == "__main__":
             print(f"Final Response: {multi_turn[i][-1]['str_response']}")
             print(f"Hallucination: {multi_turn[i][-1]['hallucination']}")
             print(f"Correct: {multi_turn[i][-1]['correct']}")
+
+    # save the results
+    if debug: print("Saving results...")
+    now = datetime.now()
+    dt_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+    save_path = os.path.join(results_dir, f"multiturn_{dt_string}.pkl")
+    with open(save_path, 'wb') as f:
+        pickle.dump(multi_turn, f)

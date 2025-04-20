@@ -13,18 +13,18 @@
 #cd msbd5002
 
 # If need to install env
-#module avail
-#module load Anaconda3
-#conda init
-#conda create -y -n hallucination_slurm python=3.10 numpy scipy ipykernel pandas
-#source activate hallucination_slurm
-#pip install scikit-learn
-#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-#pip install git+https://github.com/huggingface/transformers.git
-#pip install matplotlib seaborn accelerate sentencepiece evaluate einops rouge-score gputil captum
-#pip install selfcheckgpt spacy
-#python -m spacy download en_core_web_sm
+module avail
+module load Anaconda3
+conda init
+conda create -y -n hallucination_slurm python=3.10 numpy scipy ipykernel pandas
+source activate hallucination_slurm
+pip install scikit-learn
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install git+https://github.com/huggingface/transformers.git
+pip install matplotlib seaborn accelerate sentencepiece evaluate einops rouge-score gputil captum
+pip install selfcheckgpt spacy
+python -m spacy download en_core_web_sm
 
 # Execute applications
-source activate hallucination_slurm
+#source activate hallucination_slurm
 srun python generate.py

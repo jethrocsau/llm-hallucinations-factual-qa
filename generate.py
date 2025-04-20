@@ -13,7 +13,7 @@ from utils.data_utils import (format_prompt, format_result, load_data,
 from utils.model_utils import generate_attributes, load_model
 
 #Flags
-debug = False
+debug = True
 data_mining = True
 
 # global variables
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     #load configurations
     start = 0
-    end = 100
+    end = 10
 
     #load configurations
     if debug: print("Loading configurations...")
@@ -86,6 +86,7 @@ if __name__ == "__main__":
     n = 3
     p_thresh = 0.5
     for i, (question, aliases) in enumerate(tqdm(dataset)):
+        if debug: print(f"Generating multiturn for question {i}...")
         if debug and i > 10:
             break
         turn_data = generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh)

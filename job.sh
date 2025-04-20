@@ -8,23 +8,57 @@
 #SBATCH -p normal
 #SBATCH --nodes=1 --gpus-per-node=1
 #SBATCH --account=mscbdt2024
+#SBATCH --output=job-%j.out
+#SBATCH --error=job-%j.err
 
-# Setup runtime environment
-cd msbd5002
+echo "Job started at $(date)"
+echo "Running on node: $(hostname)"
 
-# If need to install env
-#module avail
-#module load Anaconda3
-#conda init
-#conda create -y -n hallucination_slurm python=3.10 numpy scipy ipykernel pandas
-#source activate hallucination_slurm
-#pip install scikit-learn
-#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-#pip install git+https://github.com/huggingface/transformers.git
-#pip install matplotlib seaborn accelerate sentencepiece evaluate einops rouge-score gputil captum
-#pip install selfcheckgpt spacy
-#python -m spacy download en_core_web_sm
+# Setup runtime environment - the msbd5002 folder exists in the parent directory
+cd msbd5002 || { echo "Failed to change to msbd5002 directory"; exit 1; }
+echo "Current directory: $(pwd)"
 
-# Execute applications
-source activate hallucination_slurm
-srun python generate.py --start 0 --end 1000 --n 3
+# Check if conda is available
+which conda || { echo "Conda not found in PATH"; exit 1; }
+
+# Load Anaconda module if needed
+# module load Anaconda3
+
+# List conda environments to verify
+conda env list
+
+# Activate existing environment
+echo "Activating conda environment hallucination_slurm"
+source activate hallucination_slurm || { echo "Failed to activate conda environment"; exit 1; }
+
+# Print environment info for debugging
+echo "Python version: $(python --version)"
+echo "PyTorch version: $(python -c 'import torch; print(torch.__version__)')" || echo "PyTorch not installed"
+echo "CUDA available: $(python -c 'import torch; print(torch.cuda.is_available())')" || echo "CUDA check failed"
+echo "GPU devices: $(python -c 'import torch; print(torch.cuda.device_count())')" || echo "GPU check failed"
+
+# List the contents of the current directory to verify files are present
+echo "Files in current directory:"
+ls -la
+
+# Set working directory to current directory for PYTHONPATH
+export PYTHONPATH=$(pwd):$PYTHONPATH
+
+# Check if generate.py exists
+if [ ! -f "generate.py" ]; then
+    echo "ERROR: generate.py file not found in current directory!"
+    exit 1
+fi
+
+# Run with Python verbose mode to see import errors
+echo "Starting generate.py..."
+python -v generate.py --start 0 --end 1000 --n 3 || {
+    echo "Script execution failed with exit code $?"
+    echo "Checking for potential import issues:"
+    python -c "import sys; print('Python path:', sys.path)"
+    python -c "import torch; print('Torch location:', torch.__file__)" || echo "Failed to import torch"
+    python -c "from datasets import load_dataset; print('datasets library available')" || echo "Failed to import datasets"
+    exit 1
+}
+
+echo "Job completed at $(date)"

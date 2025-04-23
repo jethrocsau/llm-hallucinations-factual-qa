@@ -230,6 +230,11 @@ def generate_attributes(model, tokenizer, embedder, question,targets):
     results['final_attention'].append(final_attention)
     results['attributes_first'].append(attributes_first)
 
+
+    for handle in fully_connected_forward_handles.values():
+        handle.remove()
+    for handle in attention_forward_handles.values():
+        handle.remove()
     del fully_connected_hidden_layers
     del attention_hidden_layers
     gc.collect()

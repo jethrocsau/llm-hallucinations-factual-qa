@@ -27,22 +27,23 @@ if not os.path.exists(results_dir):
 template = load_prompts()
 
 # generate N-turns
-def generate_multiturn_attributes(model, tokenizer, embedder, start_template, question, aliases, n,p_thresh,save_path):
+def generate_multiturn_attributes(model, tokenizer, embedder, start_template, question, aliases, n,p_thresh,save_path,idx):
     if debug: print("Generating N-turns...")
-
+    n_gen_result = []
     prompt = start_template.substitute(question=question)
     for i in range(n):
         # generate attributes
         with torch.no_grad():
             results = generate_attributes(model, tokenizer, embedder, prompt, aliases)
         results['turn'] = i
+        results['idx'] = idx
+
         # call classifier inference
-        n_gen_result = []
         template_name = 'sys-wrong'
         prob = run_classifier(results,val_fix = 1,debug = debug)
         if prob > p_thresh:
             results['hallucination'] = True
-            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = len(question),sensitivity = 0.1)
+            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 50,sensitivity = 0.1)
             #prompt = format_prompt(results['question'][0], question,  results['str_response'][0], template_name , num_answer_str = 10)
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
@@ -118,8 +119,7 @@ if __name__ == "__main__":
     if debug: print("Generating multiturn attributes...")
     p_thresh = 0.5
     for i, (question, aliases) in enumerate(tqdm(dataset)):
-        if debug: print(f"Generating multiturn for question {i}...")
-        if debug and i > 10:
-            break
-        generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh,save_path)
+        idx = i + start
+        if debug: print(f"IDX: Generating multiturn for question {idx}...")
+        generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh,save_path,idx)
         gc.collect()

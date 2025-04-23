@@ -6,7 +6,7 @@
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH -p normal
-#SBATCH --nodes=1 --gpus-per-node=1
+#SBATCH --nodes=8 --gpus-per-node=1
 #SBATCH --account=mscbdt2024
 #SBATCH --output=job-%j.out
 #SBATCH --error=job-%j.err
@@ -50,15 +50,16 @@ if [ ! -f "generate.py" ]; then
     exit 1
 fi
 
-# Run with Python verbose mode to see import errors
-echo "Starting generate.py..."
-python -v generate.py --start 1000 --end 1500 --n 3 || {
-    echo "Script execution failed with exit code $?"
-    echo "Checking for potential import issues:"
-    python -c "import sys; print('Python path:', sys.path)"
-    python -c "import torch; print('Torch location:', torch.__file__)" || echo "Failed to import torch"
-    python -c "from datasets import load_dataset; print('datasets library available')" || echo "Failed to import datasets"
-    exit 1
-}
+# Run generate.py on 8 nodes with start and end values in increments of 5
+echo "Starting generate.py on 8 nodes..."
+for i in {0..7}; do
+    start=$((i * 5+47))
+    end=$((start + 5))
+    echo "Node $i: --start $start --end $end"
+    srun -N1 -n1 python generate.py --start $start --end $end --n 3 &
+done
+
+# Wait for all background processes to complete
+wait
 
 echo "Job completed at $(date)"

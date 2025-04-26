@@ -1,10 +1,9 @@
 import random
 import os
 
-# Global vars
-MODELS = {
-
-}
+from models.load_model import load
+from models.classifer_softmax import SoftMaxClassifier
+from models.ig import RNNHallucinationClassifier
 
 # get the current directory
 utils_path = os.path.dirname(os.path.abspath(__file__))
@@ -20,5 +19,5 @@ def run_classifier(results, val_fix = -1, debug = True):
 
 
 def load_clasifier(model_name):
-    model_path = 
+    model_path =
     return model

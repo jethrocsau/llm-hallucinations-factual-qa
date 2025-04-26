@@ -48,13 +48,13 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
             else:
-                n_gen_result.append(format_result(results, save_all=False))
+                n_gen_result.append(format_result(results, save_all=True))
         else:
             results['hallucination'] = False
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
             else:
-                n_gen_result.append(format_result(results, save_all=False))
+                n_gen_result.append(format_result(results, save_all=True))
             break
 
         if debug:

@@ -6,13 +6,18 @@ from datetime import datetime
 
 import numpy as np
 import torch
+
 from datasets import load_dataset
 from tqdm import tqdm
 
-from utils.classifier import run_classifier
+from utils.classifier import run_classifier, aggregate_pred
 from utils.data_utils import (format_prompt, format_result, load_data,
                               load_prompts, rephrase_prompt)
 from utils.model_utils import generate_attributes, load_model
+
+from models.load_model import load
+from models.classifer_softmax import SoftMaxClassifier
+from models.ig import RNNHallucinationClassifier
 
 #Flags
 debug = True
@@ -40,7 +45,13 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
         # call classifier inference
         template_name = 'sys-wrong'
-        prob = run_classifier(results,val_fix = 1,debug = debug)
+        classifiers = ['activation_MLP', 'attention_MLP', 'RNN', 'softmax']
+        model = [load(i) for i in classifiers]
+        pred = []
+        for j in range(len(model)):
+            pred.append(run_classifier(model[j], results, classifiers[j], val_fix = -1, rand = False))
+        prob = aggregate_pred(pred, agg='mean')
+
         if prob > p_thresh:
             results['hallucination'] = True
             prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 50,sensitivity = 0.1)

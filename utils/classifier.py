@@ -1,6 +1,7 @@
 import random
 import os
 import numpy as np
+import scipy as sp
 from models.load_model import load
 from models.classifer_softmax import SoftMaxClassifier
 from models.ig import RNNHallucinationClassifier
@@ -17,24 +18,37 @@ gpu = "0"
 device = torch.device(f"cuda:{gpu}" if torch.cuda.is_available() else "cpu")
 
 def activations_MLP_predict(model, results):
+    model.eval()
     # load results_activations
-    result_attention_np = np.stack([x[-1] for x in results['first_attention']])
-    return model.predict(result_activation_np)
+    with torch.no_grad():
+        result_attention_np = np.stack([x[-1] for x in results['first_attention']])
+        result = model.predict(result_attention_np)
+    return result
 
 def softmax_predict(model, results):
     # load results_activations
-    first_logits = np.stack([sp.special.softmax(i[j]) for i, j in zip(results['logits'], results['start_pos'])])
-    return model(first_logits)
+    with torch.no_grad():
+        first_logits = np.stack([sp.special.softmax(i[j]) for i, j in zip(results['logits'], results['start_pos'])])
+        result = model(first_logits)    
+    return result
 
 def RNN_predict(model, results):
+    model.eval()
     # load results_activations
-    x = results['attributes_first']
-    return model(torch.tensor(x).view(1, -1, 1).to(torch.float).to(device))
+    with torch.no_grad():
+        x = results['attributes_first']
+        preds = model(torch.tensor(x).view(1, -1, 1).to(torch.float).to(device))
+        preds_softmax = torch.nn.functional.softmax(preds, dim=0)
+        result = preds_softmax[1].detach().cpu().numpy()
+    return result
 
 def attention_MLP_predict(model, results):
+    model.eval()
     # load results_activations
-    result_attention_np = np.stack([x[-1] for x in results['first_attention']])
-    return model.predict(result_attention_np)
+    with torch.no_grad():
+        result_attention_np = np.stack([x[-1] for x in results['first_attention']])
+        result = model.predict(result_attention_np)
+    return result
 
 # models
 MODELS = {
@@ -55,6 +69,8 @@ def run_classifier(model, results, model_name, val_fix = -1, rand = True):
         return 0
 
 def aggregate_pred(preds, agg):
+    #copy to cpu first
+    preds = [i.cpu().detach().numpy() if torch.is_tensor(i) else i for i in preds]
     if agg == 'mean':
         return np.mean(preds)
     elif agg == 'max':

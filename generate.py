@@ -29,12 +29,14 @@ results_dir = os.path.join(cwd, 'result')
 # create directory if not exists
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
+
 template = load_prompts()
 
 # generate N-turns
 def generate_multiturn_attributes(model, tokenizer, embedder, start_template, question, aliases, n,p_thresh,save_path,idx):
     if debug: print("Generating N-turns...")
     n_gen_result = []
+    response = []
     prompt = start_template.substitute(question=question)
     for i in range(n):
         # generate attributes
@@ -45,28 +47,36 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
         # call classifier inference
         template_name = 'sys-wrong'
-        classifiers = ['activation_MLP', 'attention_MLP', 'RNN', 'softmax']
-        model = [load(i) for i in classifiers]
+        classifiers = ['RNN']
+        classifier_model = [load(i) for i in classifiers]
         pred = []
-        for j in range(len(model)):
-            pred.append(run_classifier(model[j], results, classifiers[j], val_fix = -1, rand = False))
-        prob = aggregate_pred(pred, agg='mean')
+        for j in range(len(classifier_model)):
+            try:
+                p_classifier = run_classifier(classifier_model[j], results, classifiers[j], val_fix = -1, rand = False)
+                pred.append(p_classifier)
+                print(f"Classifier {classifiers[j]} - Hallucination: {p_classifier}")
+            except Exception as e:
+                print(f"Error in classifier {classifiers[j]}: {classifier_model[j]}")
+                print(e)
+        prob = aggregate_pred(pred, agg='max')
+        results['hallucination_prob'] = prob
 
         if prob > p_thresh:
             results['hallucination'] = True
-            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 50,sensitivity = 0.1)
+            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 20,sensitivity = 0.05)
             #prompt = format_prompt(results['question'][0], question,  results['str_response'][0], template_name , num_answer_str = 10)
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
             else:
-                n_gen_result.append(format_result(results, save_all=True))
+                n_gen_result.append(format_result(results, save_all=False))
         else:
             results['hallucination'] = False
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
             else:
-                n_gen_result.append(format_result(results, save_all=True))
+                n_gen_result.append(format_result(results, save_all=False))
             break
+
 
         if debug:
             print(f"Turn {i}:")
@@ -75,15 +85,16 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
             print(f"Hallucination: {results['hallucination']}")
             print(f"Correct: {results['correct']}")
             print(f"Next Turn Prompt: {prompt}")
+            print(f"Hallucination Prob: {prob}")
         del results
         gc.collect()
 
     # Save the result to disk
     save_result([n_gen_result], save_path)
-
+    
     if debug:
         for i in range(len(n_gen_result)):
-            print(f"Turn {i}:")
+            print(f"Final Turn {i}:")
             print(f"Question: {n_gen_result[i]['question']}")
             print(f"Response: {n_gen_result[i]['str_response']}")
             print(f"Hallucination: {n_gen_result[i]['hallucination']}")
@@ -106,12 +117,16 @@ if __name__ == "__main__":
     parser.add_argument("--start", type=int, default=0, help="Start index for the dataset.")
     parser.add_argument("--end", type=int, default=100, help="End index for the dataset.")
     parser.add_argument("--n", type=int, default=3, help="Number of turns to generate.")
+    parser.add_argument("--debug", default = False,action="store_true", help="Enable debug mode.")
+    parser.add_argument("--data_mining",default = False, action="store_true", help="Enable data mining mode.")
     args = parser.parse_args()
 
     #load configurations
     start = args.start
     end = args.end
     n = args.n
+    debug = args.debug
+    data_mining = args.data_mining
     print(f"Start index: {start}, End index: {end}, n: {n}")
 
     #load configurations

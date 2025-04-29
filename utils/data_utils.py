@@ -31,7 +31,7 @@ prompts = {
         "<<SYS>> Rephrase the question.<</SYS>>\n $question"
     ),
     'hint': Template(
-        "<<SYS>> Provide a hint to the question.<</SYS>>\n\n ### Question: $question\n\n ### Hint: "
+        "<<SYS>> Provide a hint to the question.<</SYS>>\n\n Q: $question\n\n Hint: "
     ),
     'hint-qa': Template(
         "Hint: $hint\n Q: $question\n A: "
@@ -79,7 +79,7 @@ def format_prompt(original_prompt: str, question:str,  answer:str, template_name
     return prompt
 
 # rephrase propmt with llm model
-def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length = 50, sensitivity = 0.1):
+def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length = 20, sensitivity = 0.01):
     rephrase_prompt = prompts[template_name].substitute(
         question=question
     )
@@ -95,6 +95,10 @@ def rephrase_prompt(model, tokenizer, question:str, template_name:str,max_length
             response = response.split("Q:")[0].strip()
         elif "Question:" in response:
             response = response.split("Question:")[0].strip()
+        elif "\n" in response and len(response.split("\n")) > 1:
+            response = response.split("\n")[0].strip()
+        elif "Hint:" in response and len(response.split("Hint:")) > 1:
+            response = response.split("Hint:")[0].strip()
         output = prompts['hint-qa'].substitute(
             question=question,
             hint=response
@@ -119,6 +123,7 @@ def format_result(result,save_all = False):
         save_result['str_response'] = result['str_response'][0]
         save_result['hallucination'] = result['hallucination']
         save_result['correct'] = result['correct']
+        save_result['hallucination_prob'] = result['hallucination_prob']
         save_result['turn'] = result['turn']
         return save_result
 

@@ -6,7 +6,7 @@
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH -p normal
-#SBATCH --nodes=1 --gpus-per-node=1
+#SBATCH --nodes=1 --gpus-per-node=2
 #SBATCH --account=mscbdt2024
 #SBATCH --output=job-%j.out
 #SBATCH --error=job-%j.err

@@ -6,7 +6,7 @@
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH -p normal
-#SBATCH --nodes=8 --gpus-per-node=1
+#SBATCH --nodes=4 --gpus-per-node=2
 #SBATCH --account=mscbdt2024
 #SBATCH --output=job-%j.out
 #SBATCH --error=job-%j.err
@@ -52,9 +52,9 @@ fi
 
 # Run generate.py on 8 nodes with start and end values in increments of 5
 echo "Starting generate.py on 8 nodes..."
-for i in {0..7}; do
-    start=$((i * 5+47))
-    end=$((start + 5))
+for i in {0..3}; do
+    start=$((i * 100))
+    end=$((start + 100))
     echo "Node $i: --start $start --end $end"
     srun -N1 -n1 python generate.py --start $start --end $end --n 3 &
 done

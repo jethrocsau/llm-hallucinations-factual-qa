@@ -6,18 +6,16 @@ from datetime import datetime
 
 import numpy as np
 import torch
-
 from datasets import load_dataset
 from tqdm import tqdm
 
-from utils.classifier import run_classifier, aggregate_pred
+from models.classifer_softmax import SoftMaxClassifier
+from models.ig import RNNHallucinationClassifier
+from models.load_model import load
+from utils.classifier import aggregate_pred, run_classifier
 from utils.data_utils import (format_prompt, format_result, load_data,
                               load_prompts, rephrase_prompt)
 from utils.model_utils import generate_attributes, load_model
-
-from models.load_model import load
-from models.classifer_softmax import SoftMaxClassifier
-from models.ig import RNNHallucinationClassifier
 
 #Flags
 debug = True
@@ -58,7 +56,7 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
             except Exception as e:
                 print(f"Error in classifier {classifiers[j]}: {classifier_model[j]}")
                 print(e)
-        prob = aggregate_pred(pred, agg='max')
+        prob = aggregate_pred(pred, agg='avg')
         results['hallucination_prob'] = prob
 
         if prob > p_thresh:
@@ -91,7 +89,7 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
     # Save the result to disk
     save_result([n_gen_result], save_path)
-    
+
     if debug:
         for i in range(len(n_gen_result)):
             print(f"Final Turn {i}:")

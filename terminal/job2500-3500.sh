@@ -52,7 +52,7 @@ fi
 
 # Run with Python verbose mode to see import errors
 echo "Starting generate.py..."
-python -v generate.py --start 0 --end 500 --n 3 || {
+python -v generate.py --start 2500 --end 3500 --n 3 || {
     echo "Script execution failed with exit code $?"
     echo "Checking for potential import issues:"
     python -c "import sys; print('Python path:', sys.path)"

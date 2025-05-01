@@ -33,7 +33,7 @@ if not os.path.exists(results_dir):
 template = load_prompts()
 
 # generate N-turns
-def generate_multiturn_attributes(model, tokenizer, embedder, start_template, question, aliases, n,p_thresh,save_path,idx):
+def generate_multiturn_attributes(model, tokenizer, embedder, start_template, question, aliases, n,p_thresh,save_path,idx,sensitivity):
     if debug: print("Generating N-turns...")
     n_gen_result = []
     response = []
@@ -63,7 +63,7 @@ def generate_multiturn_attributes(model, tokenizer, embedder, start_template, qu
 
         if prob > p_thresh:
             results['hallucination'] = True
-            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 20,sensitivity = 0.05)
+            prompt = rephrase_prompt(model, tokenizer, question, 'hint' , max_length = 20,sensitivity = sensitivity)
             #prompt = format_prompt(results['question'][0], question,  results['str_response'][0], template_name , num_answer_str = 10)
             if data_mining:
                 n_gen_result.append(format_result(results, save_all=True))
@@ -119,6 +119,7 @@ if __name__ == "__main__":
     parser.add_argument("--n", type=int, default=3, help="Number of turns to generate.")
     parser.add_argument("--debug", default = False,action="store_true", help="Enable debug mode.")
     parser.add_argument("--data_mining",default = False, action="store_true", help="Enable data mining mode.")
+    parser.add_argument("--sensitivity", type=float, default=0.05, help="Sensitivity for the model.")
     args = parser.parse_args()
 
     #load configurations
@@ -127,6 +128,7 @@ if __name__ == "__main__":
     n = args.n
     debug = args.debug
     data_mining = args.data_mining
+    sensitivity = args.sensitivity
     print(f"Start index: {start}, End index: {end}, n: {n}")
 
     #load configurations
@@ -147,5 +149,5 @@ if __name__ == "__main__":
     for i, (question, aliases) in enumerate(tqdm(dataset)):
         idx = i + start
         if debug: print(f"IDX: Generating multiturn for question {idx}...")
-        generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh,save_path,idx)
+        generate_multiturn_attributes(model, tokenizer, embedder, default_p,question, aliases, n,p_thresh,save_path,idx,sensitivity)
         gc.collect()

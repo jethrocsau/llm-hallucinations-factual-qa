@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository is part of the exploration into recursive dynamic generation abilities using hallucination classifiers trained on LLM attributes. The purpose of this research is to extend the work from the original "On Early Detection of Hallucinations in Factual Question Answering" by (Synder et. al.) https://arxiv.org/html/2312.14183v3]. 
+This repository is part of the exploration into recursive dynamic generation abilities using hallucination classifiers trained on LLM attributes. The purpose of this research is to extend the work from the original "On Early Detection of Hallucinations in Factual Question Answering" by (Synder et. al.) https://arxiv.org/html/2312.14183v3. 
 
 The original paper revealed the prospects of using LLM attributes to classify hallucinations based on LLM attributes alone. In this work, the purpose of the work is to extend the original author's work by designing an agentic system that would recursively prompt the model for N generations, or until an output is classified as not hallucinating.
 

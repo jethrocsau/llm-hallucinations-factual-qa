@@ -38,9 +38,12 @@ The `generate.py` script is used to generate data or perform specific tasks. Fol
    ```
 
 2. **Run the Script**:
-   Execute the script with Python. Include input arguments of --start and --end of questions.
+   Execute the script with Python. Include input arguments of --start and --end of questions. Also include --n to indicate number of turns.
 
-   Additional flags:
+   Flags:
+   - --start: starting idx of TriviaQA question
+   - --end: ending idx of TriviaQA question
+   - --n: number of multi turns for generation
    - --data_mining: flag to capture all attributes for every generate (defaulse = False). VERY DATA INTENSIVE
    - --debug: prints the intermediary outputs and multiturn prompts in terminal (default = False)
    - --sensitivity: sensitivity parameter for what level of sensitivity to used (default = 0.05)

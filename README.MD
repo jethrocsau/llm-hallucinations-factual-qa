@@ -2,7 +2,13 @@
 
 ## Project Overview
 
-This repository is part of the exploration into recursive dynamic generation abilities using hallucination classifiers trained on LLM attributes. This implementation uses a simple RNN classifier to predict hallucination, but can be replaced with more effective classifers.  In addition, an ensemble module is also prepared for future work so you can explore inference through multiple classifiers!
+This repository is part of the exploration into recursive dynamic generation abilities using hallucination classifiers trained on LLM attributes. The purpose of this research is to extend the work from the original "On Early Detection of Hallucinations in Factual Question Answering" by (Synder et. al.) https://arxiv.org/html/2312.14183v3]. 
+
+The original paper revealed the prospects of using LLM attributes to classify hallucinations based on LLM attributes alone. In this work, the purpose of the work is to extend the original author's work by designing an agentic system that would recursively prompt the model for N generations, or until an output is classified as not hallucinating.
+
+Since the purpose of this repo is to research the agentic workflow, rather than classifier accuracy, this implementation uses a simple RNN classifier to predict hallucination, but can be replaced with more effective classifers.  In addition, an ensemble module is also prepared for future work so you can explore inference through multiple classifiers. 
+
+A highly effective classifer is important as a screening tool, since each generation takes the classiifer prediction a prior in determining its recursive next-steps. A weak classifier will reduce the final performance of this architecture. 
 
 ## Repository Structure
 

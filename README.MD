@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository is designed for analyzing and generating data related to factual question answering and hallucination detection in language models. It includes scripts for data processing, model evaluation, and result generation.
+This repository is part of the exploration into recursive dynamic generation abilities using hallucination classifiers trained on LLM attributes. This implementation uses a simple RNN classifier to predict hallucination, but can be replaced with more effective classifers.  In addition, an ensemble module is also prepared for future work so you can explore inference through multiple classifiers!
 
 ## Repository Structure
 
@@ -52,6 +52,10 @@ The `generate.py` script is used to generate data or perform specific tasks. Fol
    ```bash
    python generate.py --start 0 --end 100 --sensitivity 0.1
    ```
+
+### Modifying modules
+
+The 'utils/classifier.py' module can be changed to include your own classifier by simply defining your own classiifer loading script and mapping the classifer foward func under MODELS dict along with a model name.
 
 ## License
 

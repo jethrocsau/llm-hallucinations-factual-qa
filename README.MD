@@ -55,7 +55,7 @@ The `generate.py` script is used to generate data or perform specific tasks. Fol
 
 ### Modifying modules
 
-The 'utils/classifier.py' module can be changed to include your own classifier by simply defining your own classiifer loading script and mapping the classifer foward func under MODELS dict along with a model name.
+The `utils/classifier.py` module can be changed to include your own classifier by simply defining your own classiifer loading script and mapping the classifer foward func under MODELS dict along with a model name.
 
 ## License
 

@@ -2,12 +2,12 @@
 
 #SBATCH -J hallucination
 #SBATCH -t 12:00:00
-#SBATCH --mail-user=csauac@connect.ust.hk
+#SBATCH --mail-user=XXX@connect.ust.hk
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH -p normal
 #SBATCH --nodes=1 --gpus-per-node=2
-#SBATCH --account=mscbdt2024
+#SBATCH --account=XXX
 #SBATCH --output=job-%j.out
 #SBATCH --error=job-%j.err
 
@@ -15,8 +15,8 @@ echo "Job started at $(date)"
 echo "Running on node: $(hostname)"
 
 # Setup runtime environment - the msbd5002 folder exists in the parent directory
-cd msbd5002 || { echo "Failed to change to msbd5002 directory"; exit 1; }
-echo "Current directory: $(pwd)"
+#cd msbd5002 || { echo "Failed to change to msbd5002 directory"; exit 1; }
+#echo "Current directory: $(pwd)"
 
 # Check if conda is available
 which conda || { echo "Conda not found in PATH"; exit 1; }
